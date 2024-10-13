@@ -1,1 +1,185 @@
-<h1>Hola</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Cup Map</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            background-color: #0f4c81;
+            font-family: Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+    
+        .container {
+            display: flex;
+            flex-direction: row;  /* Asegura que los elementos estén en fila */
+            flex-wrap: wrap;      /* Permite que los elementos se ajusten en varias filas si es necesario */
+            height: 100vh;        /* 100% de la altura de la ventana */
+            width: 100vw;         /* 100% del ancho de la ventana */
+            box-sizing: border-box; /* Incluir bordes y rellenos dentro del tamaño total */
+        }
+    
+        .data-view {
+            flex-basis: 25%;         /* 25% del ancho para el panel de datos */
+            height: 100%;            /* 100% de la altura disponible */
+            background-color: #eaebea;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-right: 2px solid #ccc;
+            box-sizing: border-box; /* Incluir padding y border dentro del ancho */
+        }
+    
+        .data-view h2 {
+            margin: 0;
+            font-size: 2.5vw;       /* Tamaño de texto relativo al ancho de la ventana */
+            color: #333;
+            text-align: center;
+        }
+    
+        .data-view p {
+            font-size: 2vw;         /* Tamaño de texto relativo al ancho de la ventana */
+            color: #555;
+            text-align: center;
+        }
+    
+        .map-view {
+            flex-grow: 1;           /* El mapa ocupará el resto del espacio disponible */
+            padding: 10px;
+            box-sizing: border-box;  /* Para incluir padding dentro del ancho total */
+        }
+    
+        #map {
+            width: 100%;
+            height: 100%;
+            position: relative; /* Permite que los elementos posicionados absolutamente dentro de él se alineen correctamente */
+        }
+    
+        .legend-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #fff;
+            padding: 10px;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            font-family: Helvetica, sans-serif;
+            font-size: 1.2vw;  /* Tamaño del texto relativo al ancho de la ventana */
+        }
+    
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+    
+        .color-box {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+        }
+    
+        .infolayer {
+            /* Contenedor principal de la información */
+            position: absolute; /* Para posicionar de manera relativa a su contenedor */
+            width: calc(120%); /* Ancho 120% del contenedor #map */
+            height: calc(120%); /* Altura 120% del contenedor #map */
+            top: -10%; /* Ajusta la posición vertical (puedes modificar este valor) */
+            left: -10%; /* Ajusta la posición horizontal (puedes modificar este valor) */
+            display: flex; /* Usamos flexbox para alinear elementos si es necesario */
+            flex-direction: column; /* Dirección de los elementos hijos */
+            align-items: center; /* Alineación horizontal centrada */
+            justify-content: center; /* Alineación vertical centrada */
+            font-family: Helvetica, sans-serif; /* Fuente de texto */
+            font-size: 1vw; /* Tamaño de fuente responsivo */
+            color: rgb(68, 68, 68); /* Color de texto */
+            opacity: 1; /* Opacidad */
+            z-index: 10; /* Asegúrate de que esté sobre otros elementos */
+        }
+    
+        /* Ajustes específicos para el texto */
+        .gtitle {
+            font-weight: bold; /* Negrita para el título */
+            fill: rgb(68, 68, 68); /* Color del texto */
+            font-size: 2vw; /* Tamaño de fuente responsivo basado en el ancho de la ventana */
+            white-space: pre; /* Mantiene el espacio en blanco */
+            text-align: center; /* Centrar el texto */
+        }
+    
+        .annotation-text {
+            font-size: 1.5vw; /* Tamaño de fuente responsivo basado en el ancho de la ventana */
+            fill: rgb(0, 0, 0); /* Color del texto */
+            white-space: pre; /* Mantiene el espacio en blanco */
+        }
+    
+        .annotation-arrow-g path {
+            stroke-width: 2px; /* Grosor de la flecha */
+            stroke: rgb(0, 0, 0); /* Color de la flecha */
+        }
+    
+        .cursor-pointer {
+            cursor: pointer; /* Cambia el cursor al pasar sobre las anotaciones */
+        }
+    
+        /* Ajustes de la posición de las anotaciones */
+        .annotation {
+            opacity: 1; /* Asegura que las anotaciones sean visibles */
+        }
+    
+        .bg {
+            fill: rgba(0, 0, 0, 0); /* Fondo transparente para el área de clic */
+        }
+    
+        /* Opcional: agrega margen o padding si es necesario */
+        .annotation-text-g {
+            transform: scale(1); /* Permite escalado si es necesario */
+        }
+    
+        /* Asegúrate de que el SVG y otros elementos se ajusten también */
+        .infolayer svg {
+            width: 100%; /* Ajustar el SVG al contenedor */
+            height: auto; /* Mantener la relación de aspecto */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Zona del mapa -->
+        <div class="map-view">
+            <div id="map"></div>
+        </div>
+    </div>
+    
+    <!-- Bloque de la leyenda -->
+    <div id="legend" class="legend-container">
+        <h4>Cantidad de<br> Mundiales</h4>
+        <div class="legend-item">
+            <div class="color-box" style="background: #e6e6e6;"></div>
+            <span>0</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background: #f7e55e;"></div>
+            <span>1</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background: #ffae42;"></div>
+            <span>2</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background: #6a3d9a;"></div>
+            <span>3</span>
+        </div>
+    </div>
+
+    <!-- Incluir los scripts externos -->
+    <script src="world_cup_data.js"></script> <!-- Datos del mundial -->
+    <script src="world_cup.js"></script> <!-- Lógica para el mapa -->
+</body>
+</html>
