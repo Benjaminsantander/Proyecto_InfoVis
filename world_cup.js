@@ -121,7 +121,7 @@ const layout = {
             y: 0,
             xref: 'paper',
             yref: 'paper',
-            text: '<span style="font-size: 0.8vw;">¿Sabías que el Mundial de 2026<br> será el primero en la historia en ser organizado por tres países?<br> Estos son: <em style="color:#000000;">Canadá, México y Estados Unidos</em>.</span>',  // Responsivo con colores HTML
+            text: '<span style="font-size: 0.8vw;">El <em style="color:#000000;">Mundial de 2026</em> será el primero <br>en la historia en ser <em style="color:#000000;">organizado por tres países</em><br> Estos son: <em style="color:#000000;">Canadá, México y Estados Unidos</em>.</span>',  // Responsivo con colores HTML
             showarrow: false,
             font: {
                 family: 'Helvetica, sans-serif',
