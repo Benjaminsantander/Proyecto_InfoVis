@@ -50,11 +50,12 @@ const data = [{
 // Opciones del layout del mapa
 const layout = {
     title: {
-        text: '<b style="font-size: 1.5vw;">Número de Veces que un País ha sido Anfitrión<br> de un Mundial de Fútbol</b>', // Usamos vw para hacer el título responsivo
-        font: {
-            family: 'Helvetica, sans-serif'
-        }
-    },
+    text: '<b style="font-size: 1.5vw;">Número de Veces que un País ha sido Anfitrión<br> de un Mundial de Fútbol</b>', // Usamos vw para hacer el título responsivo
+    font: {
+        family: 'Helvetica, sans-serif',
+        color: 'rgb(0, 0, 0)' 
+    }
+},
     geo: {
         projection: {
             type: 'robinson',
