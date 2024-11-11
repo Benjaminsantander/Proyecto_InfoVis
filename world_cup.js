@@ -13,8 +13,7 @@ Object.keys(worldCupData).forEach(year => {
 });
 
 // Extraer los países únicos
-const countries = Object.keys(countryCounts);
-
+const countries = Array.from(new Set(Object.values(worldCupData).flat()));
 // Extraer el conteo correspondiente a cada país
 const counts = countries.map(country => countryCounts[country]);
 
@@ -36,7 +35,7 @@ const data = [{
     autocolorscale: false,  // Desactivamos el autoescalado de colores
     showscale: false,        // Mostrar la escala de colores
     hoverinfo: 'none', // Mostrar país y cantidad en hover
-    hover: false,
+    hover: true,
     colorbar: {
         titleside: 'right',
         ticksuffix: ' veces',
@@ -78,7 +77,7 @@ const layout = {
     dragmode: false,
     annotations: [
         {
-            x: 0.24,  // Posición relativa (25% en el eje X)
+            x: 0.22,  // Posición relativa (25% en el eje X)
             y: 0.55,  // Posición relativa (55% en el eje Y)
             xref: 'paper',
             yref: 'paper',
@@ -99,7 +98,7 @@ const layout = {
         },
         {
             x: 0.23,   // Ajusta la posición relativa para Canadá
-            y: 0.8,
+            y: 0.75,
             xref: 'paper',
             yref: 'paper',
             text: '<span style="font-size: 0.8vw;">Canadá será anfitrión de su <br><em style="color:blue;">primer Mundial de Fútbol</em> en el <em style="color:blue;">2026</em></span>', // Cambio de color con etiquetas HTML
@@ -133,17 +132,155 @@ const layout = {
     ]
 };
 
-
-
-
 // Configuración para desactivar el zoom y el arrastre, pero mantener hover
 const config = {
-    scrollZoom: false,       // Desactivar el zoom por scroll
+    scrollZoom: true,       // Desactivar el zoom por scroll
     displayModeBar: false,   // Ocultar la barra de herramientas de Plotly
-    doubleClick: false,       // Desactivar el doble clic para zoom
-    hover:false,
-    responsive: true
+    doubleClick: true,       // Desactivar el doble clic para zoom
+    hover:true,
+    dragmode: false,
+    responsive: true,
 };
 
 // Renderizar el mapa
 Plotly.newPlot('map', data, layout, config);
+
+// Renderizar el mapa
+Plotly.newPlot('map', data, layout, config);
+
+// Seleccionar los elementos HTML donde se mostrará la información
+const countryName = document.getElementById('country-name');
+const yearHosted = document.getElementById('year-hosted');
+
+// Evento para cambiar la información al pasar el mouse sobre el país
+document.getElementById('map').on('plotly_hover', function(eventData) {
+    const hoveredCountry = eventData.points[0].location;
+    const years = Object.keys(worldCupData).filter(year => worldCupData[year].includes(hoveredCountry));
+
+    // Actualizar la información mostrada en la zona izquierda
+    countryName.textContent = hoveredCountry;
+    yearHosted.textContent = `Año(s) del mundial: ${years.join(', ')}`;
+
+    // Llamar a la función para actualizar la gráfica de asistentes
+    updateAttendanceChart(hoveredCountry);
+
+    // Ajustar volumen y reproducir audio si el país tiene datos de asistentes
+    if (hoveredCountry == 'Canada') {
+        No_encontrado.volumen = 0.5;
+        No_encontrado.play()
+    }
+
+    if (asistentesPorPais[hoveredCountry]) {
+        if (asistentesPorPais[hoveredCountry] == asistenciaMaxima) {
+            cheerMaxAudio.volumen = 1;
+            cheerMaxAudio.play()
+        } else {
+            const volumen = calcularVolumen(asistentesPorPais[hoveredCountry], asistenciaMaxima);
+
+            cheerAudio.volume = volumen; 
+            cheerAudio.play();
+        }
+    }
+
+});
+
+// Evento para restablecer la información cuando no se está sobre un país
+document.getElementById('map').on('plotly_unhover', function() {
+    countryName.textContent = "Pasa el mouse sobre un país";
+    yearHosted.textContent = "Año(s) del mundial:";
+
+    // Limpiar la gráfica de asistentes
+    Plotly.purge('attendance-chart');
+    cheerAudio.pause();
+    cheerAudio.currentTime = 0;
+    cheerMaxAudio.pause();
+    cheerMaxAudio.currentTime = 0;
+    No_encontrado.pause();
+    No_encontrado.currentTime = 0;
+});
+
+// Función para actualizar la gráfica de asistentes
+// Función para actualizar la gráfica de asistentes
+function updateAttendanceChart(country) {
+    // Filtrar todos los años, excluyendo 2026 si no tiene datos
+    const allYears = Object.keys(assistanceFormatted).filter(year => year !== '2026' || assistanceFormatted['2026'].Attendance !== null);
+    const allAttendance = allYears.map(year => assistanceFormatted[year].Attendance);
+
+    // Identificar los años en los que el país seleccionado fue anfitrión
+    const hostYears = allYears.map(year => 
+        assistanceFormatted[year].Host.includes(country) ? assistanceFormatted[year].Attendance : null
+    );
+
+    // Crear el trazado para todos los años (barras en gris)
+    const traceAll = {
+        x: allYears,
+        y: allAttendance,
+        type: 'bar',
+        marker: { color: '#d3d3d3' }, // Color gris para los años sin anfitrión seleccionado
+        name: 'Otros años'
+    };
+
+    // Crear el trazado para los años en los que fue anfitrión el país (barras resaltadas)
+    const traceHost = {
+        x: allYears,
+        y: hostYears,
+        type: 'bar',
+        marker: { color: '#ffae42' }, // Color de resaltado
+        name: `Años anfitrión: ${country}`
+    };
+
+    const layout = {
+        title: {
+            text: `<b>Asistencia a los Mundiales de Fútbol</b>`,
+            font: { family: 'Helvetica, sans-serif', size: 14 } // Tamaño del título más pequeño
+        },
+        xaxis: { title: 'Año', fixedrange: true },
+        yaxis: { title: 'Asistentes', fixedrange: true },
+        barmode: 'overlay',
+        margin: { t: 50, r: 20, l: 50, b: 50 },  // Márgenes para ajustarse al contenedor
+        height: document.getElementById('attendance-chart').offsetHeight,
+        width: document.getElementById('attendance-chart').offsetWidth,
+        showlegend: false
+    };
+
+    Plotly.newPlot('attendance-chart', [traceAll, traceHost], layout, { responsive: true });
+}
+
+
+
+
+
+// Cargar el audio de hinchada
+const cheerAudio = new Audio('cheer.mp3');
+const cheerMaxAudio = new Audio('max_cheer.mp3');
+const No_encontrado = new Audio('no_hay_datos.m4a');
+
+
+// Función para calcular el volumen basado en el número de asistentes
+function calcularVolumen(asistencia, asistenciaMaxima) {
+    return 0.01 + (0.3 * (asistencia / asistenciaMaxima));
+}
+
+const asistentesPorPais = {
+    "Uruguay":  590549,
+    "Italy":  2516215,
+    "France":  2903477,
+    "Brazil":  3429873,
+    "Switzerland":  768607,
+    "Sweden":  819810,
+    "Chile":  893172,
+    "United Kingdom":  1563135,
+    "Mexico":  2394031,
+    "Germany":  3352605,
+    "Argentina":  1545791,
+    "Spain":  2109723,
+    "USA":  3587538,
+    "South Korea":  2705337,
+    "Japan":  2705337,
+    "South Africa":  3178856,
+    "Russia":  3031768,
+    "Qatar":  3404252,
+};
+
+
+const asistenciaMaxima = Math.max(...Object.values(asistentesPorPais));

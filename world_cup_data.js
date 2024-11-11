@@ -23,4 +23,52 @@ const worldCupData = {
     "2022": ["Qatar"],
     "2026": ["USA", "Mexico", "Canada"]
   };
-  
+
+
+  const assistanceFormatted = {
+    "1930": { "Host": ["Uruguay"], "Attendance": 590549 },
+    "1934": { "Host": ["Italy"], "Attendance": 363000 },
+    "1938": { "Host": ["France"], "Attendance": 375700 },
+    "1950": { "Host": ["Brazil"], "Attendance": 1045246 },
+    "1954": { "Host": ["Switzerland"], "Attendance": 768607 },
+    "1958": { "Host": ["Sweden"], "Attendance": 819810 },
+    "1962": { "Host": ["Chile"], "Attendance": 893172 },
+    "1966": { "Host": ["United Kingdom"], "Attendance": 1563135 },
+    "1970": { "Host": ["Mexico"], "Attendance": 1603975 },
+    "1974": { "Host": ["Germany"], "Attendance": 1865753 },
+    "1978": { "Host": ["Argentina"], "Attendance": 1545791 },
+    "1982": { "Host": ["Spain"], "Attendance": 2109723 },
+    "1986": { "Host": ["Mexico"], "Attendance": 2394031 },
+    "1990": { "Host": ["Italy"], "Attendance": 2516215 },
+    "1994": { "Host": ["USA"], "Attendance": 3587538 },
+    "1998": { "Host": ["France"], "Attendance": 2903477 },
+    "2002": { "Host": ["South Korea", "Japan"], "Attendance": 2705337 },
+    "2006": { "Host": ["Germany"], "Attendance": 3352605 },
+    "2010": { "Host": ["South Africa"], "Attendance": 3178856 },
+    "2014": { "Host": ["Brazil"], "Attendance": 3429873 },
+    "2018": { "Host": ["Russia"], "Attendance": 3031768 },
+    "2022": { "Host": ["Qatar"], "Attendance": 3404252 }
+};
+
+
+const countryTranslation = {
+  "Uruguay": "Uruguay",
+  "Italia": "Italy",
+  "Francia": "France",
+  "Brasil": "Brazil",
+  "Suiza": "Switzerland",
+  "Suecia": "Sweden",
+  "Chile": "Chile",
+  "Reino Unido": "United Kingdom",
+  "México": "Mexico",
+  "Alemania": "Germany",
+  "Argentina": "Argentina",
+  "España": "Spain",
+  "Estados Unidos": "United States",
+  "Corea del Sur": "South Korea",
+  "Japón": "Japan",
+  "Sudáfrica": "South Africa",
+  "Rusia": "Russia",
+  "Catar": "Qatar",
+  "Canadá": "Canada"
+};
