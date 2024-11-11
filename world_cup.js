@@ -157,8 +157,11 @@ document.getElementById('map').on('plotly_hover', function(eventData) {
     const hoveredCountry = eventData.points[0].location;
     const years = Object.keys(worldCupData).filter(year => worldCupData[year].includes(hoveredCountry));
 
+    // Traducir el nombre del país al español
+    const translatedCountry = countryTranslation[hoveredCountry] || hoveredCountry;
+
     // Actualizar la información mostrada en la zona izquierda
-    countryName.textContent = hoveredCountry;
+    countryName.textContent = translatedCountry;
     yearHosted.textContent = `Año(s) del mundial: ${years.join(', ')}`;
 
     // Llamar a la función para actualizar la gráfica de asistentes
